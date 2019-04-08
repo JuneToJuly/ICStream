@@ -8,10 +8,16 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-public class SampleRequestHandler implements RequestHandler
+public class SampleRequestHandler implements Runnable
 {
+    private Socket returnSocket;
+
+    SampleRequestHandler(Socket socket) {
+        this.returnSocket = socket;
+    }
+
     @Override
-    public void handleRequest(Socket returnSocket)
+    public void run()
     {
         BufferedWriter bw = null;
         try
