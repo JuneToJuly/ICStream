@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class StreamingServer
 {
@@ -23,13 +25,14 @@ public class StreamingServer
 
     public void start()
     {
-        Socket sock = null;
-        BufferedWriter bw  = null;
         try
         {
             System.out.println("Waiting for a connection");
-            sock = serverSocket.accept();
-            new SampleRequestHandler().handleRequest(sock);
+            ExecutorService threadPool = Executors.newFixedThreadPool(20);
+            while(true) {
+                threadPool.execute(new SampleRequestHandler(serverSocket.accept()));
+            }
+
         }
         catch (IOException e)
         {
