@@ -2,23 +2,23 @@ package client.interfaces;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.*;
 
 public abstract class Request
 {
-    protected final InetSocketAddress streamingServer = new InetSocketAddress("localhost", 7878);
-    protected Thread requestThread;
-    protected Socket toSendSocket;
-    protected BufferedReader br;
-    protected BufferedWriter bw;
+    protected InetAddress serverAddress;
+    protected DatagramSocket serverSocket;
+    protected DatagramPacket sendPacket;
+    protected Thread receiveThread;
+    protected byte[] sendBuffer, recBuffer;
+    protected boolean isConnected;
 
-    public abstract void buildRequest(Socket toSendSocket);
+    public abstract void buildRequest(DatagramSocket serverSocket);
 
     public abstract void sendRequest();
 
     public void stopRequest()
     {
-        requestThread.interrupt();
+        serverSocket.close();
     }
 }
