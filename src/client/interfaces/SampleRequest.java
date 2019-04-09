@@ -3,77 +3,80 @@ package client.interfaces;
 import javafx.scene.control.TextArea;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.*;
 
 public class SampleRequest extends Request
 {
     private TextArea dataOutput;
 
-    public SampleRequest(TextArea area)
+    // Constructor
+    public SampleRequest(TextArea area) throws UnknownHostException
     {
         super();
         this.dataOutput = area;
+        this.serverAddress = InetAddress.getByName("localhost");
+        this.sendBuffer = new byte[256];
+        this.recBuffer = new byte[65508];
+        this.isConnected = false;
     }
 
-    public void buildRequest(Socket toSendSocket)
+    // Set up connection vars
+    public void buildRequest(DatagramSocket serverSocket)
     {
-
-        this.toSendSocket = toSendSocket;
+        this.serverSocket = serverSocket;
+        sendBuffer = "May I connect?".getBytes();
+        this.sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, serverAddress, 4445);
     }
 
+    // Attempt to send request to Server
     @Override
     public void sendRequest()
     {
         try
         {
+            dataOutput.clear();
             System.out.println("Connecting to streaming server");
-            toSendSocket.connect(streamingServer);
+            serverSocket.send(sendPacket);
             System.out.println("Connection success");
-            br  = new BufferedReader(new InputStreamReader(toSendSocket.getInputStream()));
-            bw  = new BufferedWriter(new OutputStreamWriter(toSendSocket.getOutputStream()));
+//            isConnected = true;
         }
         catch (IOException ex)
         {
             ex.printStackTrace();
         }
 
-        Runnable sendRunnable = new Runnable()
+        Runnable receiveLoop = new Runnable()
         {
             @Override
             public void run()
             {
-                dataOutput.clear();
-                String newLines = "";
-               while(!Thread.interrupted())
-               {
-                   System.out.println("Waiting for data");
-                   try
-                   {
-                       newLines += br.readLine();
-                       System.out.println("Got new lines: " +  newLines);
-                       dataOutput.setText(newLines);
-                   }
-                   catch (IOException e)
-                   {
-                       e.printStackTrace();
-                   }
-               }
+                DatagramPacket recPacket = new DatagramPacket(recBuffer, recBuffer.length);
+                // While connection exists, listen for packets from server
+                while(!Thread.interrupted()) {
+                    System.out.println("Waiting for data.");
+                    try
+                    {
+                        serverSocket.receive(recPacket);
+                    }
+                    catch (IOException i)
+                    {
+                        System.out.println("Client stopped. Send END packet.");
+                        break;
+                    }
 
-               try
-               {
-                   dataOutput.setText("Stream over, thanks for viewing.");
-                   toSendSocket.close();
-                   br.close();
-                   bw.close();
-               }
-               catch (IOException e)
-               {
-                   e.printStackTrace();
-               }
+                    // Extract data from sent packet, add to text field
+                    String recData = new String(recPacket.getData(), 0, recPacket.getLength());
+                    dataOutput.appendText(recData);
+                }
+
+                // TODO Send END-packet so server knows to stop sending count to this client
+                // Connection broken, close down
+                dataOutput.setText("Stream has ended.");
+                serverSocket.close();
             }
         };
-        requestThread  = new Thread(sendRunnable);
-        requestThread.start();
+
+        receiveThread = new Thread(receiveLoop);
+        receiveThread.start();
     }
 }

@@ -1,42 +1,48 @@
 package server;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+
 import java.io.*;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class StreamingServer
 {
-    ServerSocket serverSocket;
+    private int port;
 
-    public StreamingServer()
+    // Constructor
+    public StreamingServer(int port) throws IOException
     {
-        try
-        {
-            serverSocket = new ServerSocket(7878, 100, InetAddress.getByName("localhost"));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        this.port = port;
     }
 
     public void start()
     {
-        try
+        try (DatagramSocket socket = new DatagramSocket(port))
         {
-            System.out.println("Waiting for a connection");
             ExecutorService threadPool = Executors.newFixedThreadPool(20);
-            while(true) {
-                threadPool.execute(new SampleRequestHandler(serverSocket.accept()));
-            }
+            while(true)
+            {
+                try
+                {
+                    byte[] buffer = new byte[256];
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
+                    System.out.println("Waiting for a connection");
+                    socket.receive(packet);
+                    System.out.println("Spawning new thread for: " + new String(packet.getData(), 0, packet.getLength()));
+                    threadPool.execute(new SampleRequestHandler(socket, packet));
+                }
+                catch (IOException i)
+                {
+                    i.printStackTrace();
+                }
+            }
         }
-        catch (IOException e)
+        catch (SocketException s)
         {
-            e.printStackTrace();
+            s.printStackTrace();
         }
     }
 }

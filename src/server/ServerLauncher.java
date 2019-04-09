@@ -1,10 +1,12 @@
 package server;
 
+import java.io.IOException;
+
 public class ServerLauncher
 {
-    public static void main(String args[])
+    public static void main(String args[]) throws IOException
     {
-        StreamingServer server = new StreamingServer();
+        StreamingServer server = new StreamingServer(4445);
         server.start();
     }
 }
