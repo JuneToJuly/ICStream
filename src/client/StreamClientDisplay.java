@@ -9,16 +9,15 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import java.net.Socket;
 
-public class ClientDisplay
+public class StreamClientDisplay
 {
     private Stage stage;
     private Scene scene;
     private SampleRequest sampleRequest;
 
-    public ClientDisplay(Stage stage)
+    public StreamClientDisplay(Stage stage)
     {
         this.stage = stage;
-
         buildDisplay();
     }
 

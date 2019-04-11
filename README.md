@@ -1,27 +1,23 @@
 # ICStream
 
-#### Current Bugs
-* Server continues sending packets after client has stopped, i.e. threads don't die.
-* "Start stream" multiple times in one client will spawn additional counting threads for it.
+#### Client Logic/Roadmap
+StreamClient
+* Client type that is broadcasting/streaming.
+* GUI: ????
+* When this type of client is launched, it sends a request to the server to stream. (StartStreamRequest)
+* It must provide a name (string).
+* The server stores a streamerMap<ThreadID, name>, and immediately checks if the name is unique.
+* If unique, the server assigns a thread from its streamerPool to the client, and stores that pair in its map.
+* If not unique, responds with appropriate correction/suggestion.
+* Once name is valid, connects to socket and begins sending file chunks.
 
-#### TODO
+WatchClient
+* Client type that is consuming another broadcast.
+* GUI: Section to select from connected StreamClients, MediaPlayer for once connected
+* First request: connect to server, provide unique name (CurrentStreamsRequest)
+* Response: Checks if name is unique, if so provides list of currently streaming StreamClients
+* Second Request: choose StreamClient to watch (ViewStreamRequest)
+* Response: begin broadcasting chosen StreamClient to MediaPlayer
 
-###### Client
-* Send END packet back to server so it can know to stop sending packets to this client.
-* Add alternate request type for streaming (at this point, SampleRequest.java just watches the server).
-
-###### Server
-* Assign each client the ID of the server thread from which they're running so the server can keep track of client states.
-* Add logic for handling both types of requests (watch & stream).
-
-###### General/Later
-* Figure out video/audio integration
-* Add checks in server for client START packets to ensure they are expected.
-
-```
-if(packet.getData() != "I'm a valid watcher, can I connect?") {
-    refuse();
-}
-```
-* Add ability for watchers to see IDs of current streaming clients, send secondary START packet with their viewing choice.
-* Refactor in general: get rid of unused vars, etc.
+Notes
+* So, the server will contain two ThreadPools and two maps for the names of the clients corresponding to active threads in each pool
