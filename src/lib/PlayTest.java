@@ -15,9 +15,12 @@ public class PlayTest extends Application
     {
         StreamView view = new StreamView();
 
-        File file = new File("K:/git/ICStream/resources/sample_video/3.mp4");
-        File file1 = new File("K:/git/ICStream/resources/sample_video/4.mp4");
-        File file2 = new File("K:/git/ICStream/resources/sample_video/2.mp4");
+//        File file = new File("K:/git/ICStream/resources/sample_video/3.mp4");
+//        File file1 = new File("K:/git/ICStream/resources/sample_video/4.mp4");
+//        File file2 = new File("K:/git/ICStream/resources/sample_video/2.mp4");
+        File file = new File("resources/sample_video/3.mp4");
+        File file1 = new File("resources/sample_video/2.mp4");
+        File file2 = new File("resources/sample_video/1.mp4");
 
         view.queueMediaPlayer(Stream.playerFromFile(file));
         view.queueMediaPlayer(Stream.playerFromFile(file1));

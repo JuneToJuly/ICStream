@@ -8,7 +8,7 @@ import java.net.Socket;
 public class CurrentStreamsRequest extends Request
 {
     @Override
-    public void buildRequest(DatagramSocket toSendSocket)
+    public void buildRequest(Socket toSendSocket)
     {
 
     }
