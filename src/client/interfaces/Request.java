@@ -12,6 +12,8 @@ public abstract class Request
     protected Socket toSendSocket;
     protected BufferedReader br;
     protected BufferedWriter bw;
+    protected int requestType;
+    protected String clientName;
 
     public abstract void buildRequest(Socket toSendSocket);
 
