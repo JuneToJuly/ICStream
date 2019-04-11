@@ -9,7 +9,7 @@ import java.net.Socket;
 public class ViewStreamRequest extends Request
 {
     @Override
-    public void buildRequest(DatagramSocket toSendSocket)
+    public void buildRequest(Socket toSendSocket)
     {
 
     }

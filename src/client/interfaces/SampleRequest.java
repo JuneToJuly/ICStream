@@ -1,82 +1,75 @@
 package client.interfaces;
 
 import javafx.scene.control.TextArea;
-
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
 
 public class SampleRequest extends Request
 {
     private TextArea dataOutput;
 
-    // Constructor
-    public SampleRequest(TextArea area) throws UnknownHostException
+    public SampleRequest(TextArea area)
     {
         super();
         this.dataOutput = area;
-        this.serverAddress = InetAddress.getByName("localhost");
-        this.sendBuffer = new byte[256];
-        this.recBuffer = new byte[65508];
-        this.isConnected = false;
     }
 
-    // Set up connection vars
-    public void buildRequest(DatagramSocket serverSocket)
+    public void buildRequest(Socket toSendSocket)
     {
-        this.serverSocket = serverSocket;
-        sendBuffer = "May I connect?".getBytes();
-        this.sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, serverAddress, 4445);
+
+        this.toSendSocket = toSendSocket;
     }
 
-    // Attempt to send request to Server
     @Override
     public void sendRequest()
     {
         try
         {
-            dataOutput.clear();
             System.out.println("Connecting to streaming server");
-            serverSocket.send(sendPacket);
+            toSendSocket.connect(streamingServer);
             System.out.println("Connection success");
-//            isConnected = true;
+            br  = new BufferedReader(new InputStreamReader(toSendSocket.getInputStream()));
+            bw  = new BufferedWriter(new OutputStreamWriter(toSendSocket.getOutputStream()));
         }
         catch (IOException ex)
         {
             ex.printStackTrace();
         }
 
-        Runnable receiveLoop = new Runnable()
+        // Converted run() to lambda model
+        Runnable receiveLoop = () ->
         {
-            @Override
-            public void run()
+            dataOutput.clear();
+            String newLines = "";
+            while(!Thread.interrupted())
             {
-                DatagramPacket recPacket = new DatagramPacket(recBuffer, recBuffer.length);
-                // While connection exists, listen for packets from server
-                while(!Thread.interrupted()) {
-                    System.out.println("Waiting for data.");
-                    try
-                    {
-                        serverSocket.receive(recPacket);
-                    }
-                    catch (IOException i)
-                    {
-                        System.out.println("Client stopped. Send END packet.");
-                        break;
-                    }
-
-                    // Extract data from sent packet, add to text field
-                    String recData = new String(recPacket.getData(), 0, recPacket.getLength());
-                    dataOutput.appendText(recData);
+                System.out.println("Waiting for data");
+                try
+                {
+                    newLines += br.readLine();
+                    System.out.println("Got new lines: " +  newLines);
+                    dataOutput.setText(newLines);
                 }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
 
-                // TODO Send END-packet so server knows to stop sending count to this client
-                // Connection broken, close down
-                dataOutput.setText("Stream has ended.");
-                serverSocket.close();
+            try
+            {
+                dataOutput.setText("Stream over, thanks for viewing.");
+                toSendSocket.close();
+                br.close();
+                bw.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
             }
         };
 
-        receiveThread = new Thread(receiveLoop);
-        receiveThread.start();
+        requestThread = new Thread(receiveLoop);
+        requestThread.start();
     }
 }

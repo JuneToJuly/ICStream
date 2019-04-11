@@ -1,48 +1,42 @@
 package server;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-
 import java.io.*;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class StreamingServer
 {
-    private int port;
+    private ServerSocket serverSocket;
 
-    // Constructor
-    public StreamingServer(int port) throws IOException
+    public StreamingServer()
     {
-        this.port = port;
+        try
+        {
+            serverSocket = new ServerSocket(7878, 100, InetAddress.getByName("localhost"));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public void start()
     {
-        try (DatagramSocket socket = new DatagramSocket(port))
+        try
         {
+            System.out.println("Waiting for a connection");
+            // Arbitrarily 20 threads for now, probably enough for demo
             ExecutorService threadPool = Executors.newFixedThreadPool(20);
-            while(true)
-            {
-                try
-                {
-                    byte[] buffer = new byte[256];
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
-                    System.out.println("Waiting for a connection");
-                    socket.receive(packet);
-                    System.out.println("Spawning new thread for: " + new String(packet.getData(), 0, packet.getLength()));
-                    threadPool.execute(new SampleRequestHandler(socket, packet));
-                }
-                catch (IOException i)
-                {
-                    i.printStackTrace();
-                }
+            while(true) {
+                threadPool.execute(new SampleRequestHandler(serverSocket.accept()));
             }
+
         }
-        catch (SocketException s)
+        catch (IOException e)
         {
-            s.printStackTrace();
+            e.printStackTrace();
         }
     }
 }
