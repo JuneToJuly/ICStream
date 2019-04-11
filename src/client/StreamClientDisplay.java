@@ -1,19 +1,22 @@
 package client;
 
-import client.interfaces.SampleRequest;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.File;
 import java.net.Socket;
+import java.util.Optional;
 
 public class StreamClientDisplay
 {
     private Stage stage;
     private Scene scene;
-    private SampleRequest sampleRequest;
+    private StartStreamRequest startStreamRequest;
 
     public StreamClientDisplay(Stage stage)
     {
@@ -24,30 +27,41 @@ public class StreamClientDisplay
     private void buildDisplay()
     {
         FlowPane pane = new FlowPane();
-        TextArea textStream = new TextArea("The stream data will appear here.");
-        Button b_startStream = new Button("Start Stream");
-        Button b_stopStream = new Button("Stop Stream");
-        pane.getChildren().addAll(b_startStream, b_stopStream, textStream);
 
-        addListeners(b_startStream, b_stopStream, textStream);
+        Button b_startStream = new Button("Start Streaming");
+        FileChooser chooser = new FileChooser();
+        Button b_stopStream = new Button("Stop Stream");
+
+        pane.getChildren().addAll(b_startStream, b_stopStream);
+
+        addListeners(b_startStream, b_stopStream, chooser);
         scene = new Scene(pane);
         stage.setScene(scene);
         stage.setOnCloseRequest(event -> Platform.exit());
     }
 
-    private void addListeners(Button b_startStream, Button b_stopStream, TextArea dataOutput)
+    private void addListeners(Button b_startStream, Button b_stopStream, FileChooser chooser)
     {
         b_startStream.setOnAction(e ->
         {
+            // Choose a file for stream
+            File chosenFile = chooser.showOpenDialog(stage);
+            TextInputDialog name = new TextInputDialog("Streamer Name");
+            Optional<String> streamerName = name.showAndWait();
+            TextInputDialog title = new TextInputDialog("Stream Title");
+            Optional<String> streamTitle = title.showAndWait();
+
+            // Get request ready
             Socket socket = new Socket();
-            sampleRequest = new SampleRequest(dataOutput);
-            sampleRequest.buildRequest(socket);
-            sampleRequest.sendRequest();
+            startStreamRequest = new StartStreamRequest(streamerName.get(), streamTitle.get(), chosenFile);
+            startStreamRequest.buildRequest(socket);
+            // Logic for the request in the request class
+            startStreamRequest.sendRequest();
         });
 
         b_stopStream.setOnAction(e ->
         {
-            sampleRequest.stopRequest();
+            startStreamRequest.stopRequest();
         });
 
     }
