@@ -6,7 +6,7 @@ public class ServerLauncher
 {
     public static void main(String args[]) throws IOException
     {
-        StreamingServer server = new StreamingServer(4445);
+        StreamingServer server = new StreamingServer();
         server.start();
     }
 }

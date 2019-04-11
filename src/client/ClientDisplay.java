@@ -7,8 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
-
-import java.net.*;
+import java.net.Socket;
 
 public class ClientDisplay
 {
@@ -41,18 +40,10 @@ public class ClientDisplay
     {
         b_startStream.setOnAction(e ->
         {
-            try
-            {
-                DatagramSocket socket = new DatagramSocket();
-                sampleRequest = new SampleRequest(dataOutput);
-                sampleRequest.buildRequest(socket);
-                sampleRequest.sendRequest();
-            }
-            catch(SocketException | UnknownHostException ex)
-            {
-                ex.printStackTrace();
-            }
-
+            Socket socket = new Socket();
+            sampleRequest = new SampleRequest(dataOutput);
+            sampleRequest.buildRequest(socket);
+            sampleRequest.sendRequest();
         });
 
         b_stopStream.setOnAction(e ->
