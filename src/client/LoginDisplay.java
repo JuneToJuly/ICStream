@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.net.Socket;
@@ -127,7 +128,8 @@ public class LoginDisplay
             // Extract username from textfield
             String username = t_name.getText();
             String streamName = t_stream.getText();
-            File streamFile = new File("path");
+            FileChooser chooser = new FileChooser();
+            File streamFile = chooser.showOpenDialog(stage);
 
             // Configure alert if name was not entered
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

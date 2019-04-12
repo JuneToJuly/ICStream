@@ -1,5 +1,8 @@
 package server;
 
+import javafx.util.Pair;
+import lib.LiveStream;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +17,7 @@ public class InitialConnectionHandler implements Runnable
     private String toWatch;
     private ConcurrentHashMap<String,Long> streamingClients;
     private ConcurrentHashMap<String,Long> watchingClients;
+    private ConcurrentHashMap<Pair<String, String>, LiveStream> liveStreams;
     private DataInputStream dataIn;
     private DataOutputStream dataOut;
 
@@ -21,12 +25,14 @@ public class InitialConnectionHandler implements Runnable
     public InitialConnectionHandler(Socket socket,
                                     ConcurrentHashMap<String,Long> streamingClients,
                                     ConcurrentHashMap<String,Long> watchingClients,
+                                    ConcurrentHashMap<Pair<String, String>, LiveStream> liveStreams,
                                     String toWatch)
     {
         this.returnSocket = socket;
         this.toWatch = toWatch;
         this.streamingClients = streamingClients;
         this.watchingClients = watchingClients;
+        this.liveStreams = liveStreams;
     }
 
     @Override
@@ -63,9 +69,9 @@ public class InitialConnectionHandler implements Runnable
                         {
                             // Add client name and ID to Server streamingMap
                             streamingClients.put(clientName, Thread.currentThread().getId());
+                            String streamTitle = "";
                             System.out.println("Calling startStream()");
-                            // TODO write startStream()
-                            // startStream();
+                            startStream(new Pair<String,String>(clientName, streamTitle));
                         }
                         else
                         {
@@ -156,8 +162,11 @@ public class InitialConnectionHandler implements Runnable
         }
     }
 
-    private void startStream()
+    private void startStream(Pair<String, String> clientName)
     {
+        LiveStream myStream = new LiveStream();
+        // Concurrent HashMap Guarantees happens-before relationship for safe-publication
+        liveStreams.put(clientName, myStream);
 
     }
 

@@ -1,5 +1,9 @@
 package server;
 
+import javafx.util.Pair;
+import lib.LiveStream;
+import lib.StreamSegment;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -14,6 +18,7 @@ public class StreamingServer
     private ServerSocket serverSocket;
     private ConcurrentHashMap<String,Long> streamingClients;
     private ConcurrentHashMap<String,Long> watchingClients;
+    private ConcurrentHashMap<Pair<String, String>, LiveStream> liveStreams;
 
     public StreamingServer()
     {
@@ -35,6 +40,7 @@ public class StreamingServer
             String toWatch = "temp";
             streamingClients = new ConcurrentHashMap<>();
             watchingClients = new ConcurrentHashMap<>();
+            liveStreams = new ConcurrentHashMap<>();
             System.out.println("Waiting for a connection");
 
             // Arbitrarily 20 threads for now, probably enough for demo
@@ -42,7 +48,7 @@ public class StreamingServer
             while(true) {
                 // As soon as communication is received, send info to Handler thread
                 // Include concurrent maps so thread can modify them
-                threadPool.execute(new InitialConnectionHandler(serverSocket.accept(), streamingClients, watchingClients, toWatch));
+                threadPool.execute(new InitialConnectionHandler(serverSocket.accept(), streamingClients, watchingClients, liveStreams, toWatch));
             }
 
         }
