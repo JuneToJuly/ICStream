@@ -27,6 +27,14 @@ public class CurrentStreamsRequest extends Request
     @Override
     public void sendRequest()
     {
+
+    }
+
+    // Required String return because Server must return
+    // active streams back to the client
+    public String sendStringRequest()
+    {
+        String response = "";
         try
         {
             // First connect to client
@@ -45,7 +53,7 @@ public class CurrentStreamsRequest extends Request
             System.out.println("Waiting for server response...");
 
             // Blocks until dataIn is populated
-            String response = dataIn.readUTF();
+            response = dataIn.readUTF();
             System.out.println("Response from server: " + response);
 
             // Shut everything down, the request has been satisfied
@@ -57,5 +65,7 @@ public class CurrentStreamsRequest extends Request
         {
             e.printStackTrace();
         }
+
+        return response;
     }
 }

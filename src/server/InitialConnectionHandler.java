@@ -78,10 +78,22 @@ public class InitialConnectionHandler implements Runnable
                     // Client would like to know who is currently streaming
                     case 200:
                         System.out.println("Handling whoIsStreaming()");
+                        System.out.println("Client name: " + clientName);
+                        // Fake viewer for testing purposes TODO comment later
+                        watchingClients.put("Alexis", Thread.currentThread().getId());
 
-                        // Fake streamers for testing purposes
-//                        streamingClients.put("Chris", Thread.currentThread().getId());
-//                        streamingClients.put("Ian", Thread.currentThread().getId() + 1);
+                        // Make sure viewer name is unique
+                        if(watchingClients.containsKey(clientName))
+                        {
+                            System.out.println("Name already viewing.");
+                            dataOut.writeUTF("non-unique name");
+                            dataOut.flush();
+                            break;
+                        }
+
+                        // Fake streamers for testing purposes TODO comment later
+                        streamingClients.put("Chris", Thread.currentThread().getId());
+                        streamingClients.put("Ian", Thread.currentThread().getId() + 1);
                         if(!streamingClients.isEmpty())
                         {
                             System.out.println("The following streamers are active: " +
@@ -107,12 +119,12 @@ public class InitialConnectionHandler implements Runnable
                             // Add client name and ID to Server watchingMap
                             watchingClients.put(clientName, Thread.currentThread().getId());
                             System.out.println("Calling watchStream(toWatch)");
-                            // TODO write watchStream(toWatch)
+                            // TODO - write watchStream(toWatch)
                             // watchStream(toWatch);
                         }
                         else
                         {
-                            // Client name already exists
+                            // Stream isn't broadcasting anymore by the time client connected
                             dataOut.writeUTF("Streamer " + toWatch + " has ended their stream. Try someone else.");
                             dataOut.flush();
                         }
