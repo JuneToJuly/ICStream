@@ -1,7 +1,8 @@
 package server;
 
-import javafx.util.Pair;
 import lib.LiveStream;
+import lib.Stream;
+import lib.StreamSegment;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,9 +16,13 @@ public class InitialConnectionHandler implements Runnable
 {
     private Socket returnSocket;
     private String toWatch;
+    private String streamTitle;
     private ConcurrentHashMap<String,Long> streamingClients;
     private ConcurrentHashMap<String,Long> watchingClients;
-    private ConcurrentHashMap<Pair<String, String>, LiveStream> liveStreams;
+
+    // Pair is streamer name, and stream title
+    private ConcurrentHashMap<String, LiveStream> liveStreams;
+
     private DataInputStream dataIn;
     private DataOutputStream dataOut;
 
@@ -25,7 +30,7 @@ public class InitialConnectionHandler implements Runnable
     public InitialConnectionHandler(Socket socket,
                                     ConcurrentHashMap<String,Long> streamingClients,
                                     ConcurrentHashMap<String,Long> watchingClients,
-                                    ConcurrentHashMap<Pair<String, String>, LiveStream> liveStreams,
+                                    ConcurrentHashMap<String, LiveStream> liveStreams,
                                     String toWatch)
     {
         this.returnSocket = socket;
@@ -38,7 +43,6 @@ public class InitialConnectionHandler implements Runnable
     @Override
     public void run()
     {
-
         System.out.println("Connection from Client received.");
 
         // Vars for type of client and unique identifier
@@ -69,9 +73,8 @@ public class InitialConnectionHandler implements Runnable
                         {
                             // Add client name and ID to Server streamingMap
                             streamingClients.put(clientName, Thread.currentThread().getId());
-                            String streamTitle = "";
                             System.out.println("Calling startStream()");
-                            startStream(new Pair<String,String>(clientName, streamTitle));
+                            startStream(clientName);
                         }
                         else
                         {
@@ -162,16 +165,64 @@ public class InitialConnectionHandler implements Runnable
         }
     }
 
-    private void startStream(Pair<String, String> clientName)
+    private void startStream(String name)
     {
         LiveStream myStream = new LiveStream();
+
         // Concurrent HashMap Guarantees happens-before relationship for safe-publication
-        liveStreams.put(clientName, myStream);
+        liveStreams.put(name, myStream);
+
+        // Need to send
+        ObjectInputStream videoStream = null;
+
+        try
+        {
+            // Need to create stream for serialization
+            videoStream = new ObjectInputStream(returnSocket.getInputStream());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
+            dataOut.writeUTF("ready\n");
+            dataOut.flush();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        StreamSegment receivedSegment;
+
+        while(!Thread.interrupted())
+        {
+            try
+            {
+                if(videoStream != null)
+                {
+                    receivedSegment = (StreamSegment) videoStream.readObject();
+                    myStream.addSegment(receivedSegment);
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            catch (ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
 
     }
 
     private void watchStream(String streamName)
     {
+
 
     }
 }

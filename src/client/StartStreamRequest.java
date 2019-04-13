@@ -1,6 +1,7 @@
 package client;
 
 import client.interfaces.Request;
+import javafx.concurrent.Task;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
@@ -10,6 +11,9 @@ import lib.Stream;
 import java.io.*;
 import java.net.Socket;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class StartStreamRequest extends Request
 {
@@ -47,17 +51,36 @@ public class StartStreamRequest extends Request
             ex.printStackTrace();
         }
 
+
+
+
         Runnable receiveLoop = () ->
         {
+
+
+            MediaPlayer player = Stream.playerFromFile(streamFile);
+
+            // Can't lambda it's not a functional interface
+            Task<FileSplitter.SplitFile> splitFileTask = new Task<FileSplitter.SplitFile>()
+            {
+                @Override
+                protected FileSplitter.SplitFile call() throws Exception
+                {
+                    return new FileSplitter.SplitFile(streamFile, player, Duration.seconds(5));
+                }
+            };
+
+            Executors.newSingleThreadExecutor().submit(splitFileTask);
+
             // Send over initial information and get confirmation
-            char confirmation = 'n';
+            String confirmation = "";
             System.out.println("Waiting for confirmation.");
             try
             {
-                while (confirmation != 'c' && !Thread.interrupted())
+                while (!confirmation.equals("ready") && !Thread.interrupted())
                 {
-                    confirmation = (char) br.read();
-                    if (confirmation == 'c')
+                    confirmation = br.readLine();
+                    if (confirmation.equals("ready"))
                     {
                         break;
                     }
@@ -78,14 +101,32 @@ public class StartStreamRequest extends Request
                 e.printStackTrace();
             }
 
-            // Confirmation has been given
-            // Split file, could have done this earlier for performance
-            MediaPlayer player = Stream.playerFromFile(streamFile);
-            FileSplitter.SplitFile splitFile = new FileSplitter.SplitFile(streamFile, player, Duration.seconds(2));
+            // Split the file, a task is just a Future pretty much
+            FileSplitter.SplitFile splitFile = null;
+            try
+            {
+                splitFile = splitFileTask.get();
+            }
+            catch (InterruptedException | ExecutionException e)
+            {
+                e.printStackTrace();
+            }
 
+            try
+            {
+                ObjectOutputStream videoSteam = new ObjectOutputStream(toSendSocket.getOutputStream());
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            String filename = splitFile.getSplitPrefix();
             for (int i = 0; i < splitFile.getSplitCount(); i++)
             {
                 // send each split
+                File segment = new File(filename + i + ".mp4");
+
                 // wait to simulate stream fetch
             }
 

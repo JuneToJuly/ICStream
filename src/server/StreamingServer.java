@@ -1,24 +1,20 @@
 package server;
 
-import javafx.util.Pair;
 import lib.LiveStream;
-import lib.StreamSegment;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class StreamingServer
 {
     private ServerSocket serverSocket;
     private ConcurrentHashMap<String,Long> streamingClients;
     private ConcurrentHashMap<String,Long> watchingClients;
-    private ConcurrentHashMap<Pair<String, String>, LiveStream> liveStreams;
+    private ConcurrentHashMap<String, LiveStream> liveStreams;
 
     public StreamingServer()
     {
