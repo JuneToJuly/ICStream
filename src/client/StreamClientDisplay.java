@@ -51,11 +51,9 @@ public class StreamClientDisplay
             TextInputDialog title = new TextInputDialog("Stream Title");
             Optional<String> streamTitle = title.showAndWait();
 
-            // Get request ready
             Socket socket = new Socket();
             startStreamRequest = new StartStreamRequest(streamerName.get(), streamTitle.get(), chosenFile);
             startStreamRequest.buildRequest(socket);
-            // Logic for the request in the request class
             startStreamRequest.sendRequest();
         });
 
@@ -63,7 +61,6 @@ public class StreamClientDisplay
         {
             startStreamRequest.stopRequest();
         });
-
     }
 
     public void show()

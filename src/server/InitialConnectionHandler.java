@@ -1,7 +1,6 @@
 package server;
 
 import lib.LiveStream;
-import lib.Stream;
 import lib.StreamSegment;
 
 import java.io.*;
@@ -169,25 +168,15 @@ public class InitialConnectionHandler implements Runnable
     {
         LiveStream myStream = new LiveStream();
 
-        // Concurrent HashMap Guarantees happens-before relationship for safe-publication
+        // Concurrent HashMap guarantees happens-before relationship for safe-publication
         liveStreams.put(name, myStream);
 
-        // Need to send
         ObjectInputStream videoStream = null;
-
         try
         {
-            // Need to create stream for serialization
+            // Need to create stream for serialization, this blocks waiting for header
             videoStream = new ObjectInputStream(returnSocket.getInputStream());
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        try
-        {
-            dataOut.writeUTF("ready\n");
+            dataOut.writeUTF("ready");
             dataOut.flush();
         }
         catch (IOException e)
@@ -195,8 +184,8 @@ public class InitialConnectionHandler implements Runnable
             e.printStackTrace();
         }
 
+        // Stream now ready
         StreamSegment receivedSegment;
-
         while(!Thread.interrupted())
         {
             try
@@ -207,22 +196,15 @@ public class InitialConnectionHandler implements Runnable
                     myStream.addSegment(receivedSegment);
                 }
             }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            catch (ClassNotFoundException e)
+            catch (IOException | ClassNotFoundException e)
             {
                 e.printStackTrace();
             }
         }
-
-
     }
 
     private void watchStream(String streamName)
     {
-
 
     }
 }

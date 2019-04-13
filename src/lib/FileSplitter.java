@@ -90,6 +90,7 @@ public class FileSplitter
                 {
                     e.printStackTrace();
                 }
+                System.out.println("split done");
             }
         }
 
