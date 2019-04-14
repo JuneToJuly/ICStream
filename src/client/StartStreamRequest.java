@@ -8,6 +8,7 @@ import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 import lib.FileSplitter;
 import lib.Stream;
+import lib.StreamSegment;
 
 import java.io.*;
 import java.net.Socket;
@@ -52,10 +53,7 @@ public class StartStreamRequest extends Request
             dataOut = new DataOutputStream(toSendSocket.getOutputStream());
             dataIn = new DataInputStream(toSendSocket.getInputStream());
         }
-        catch (IOException ex)
-        {
-            ex.printStackTrace();
-        }
+        catch (IOException ex) { ex.printStackTrace(); }
 
         Runnable request = () ->
         {
@@ -108,32 +106,27 @@ public class StartStreamRequest extends Request
                     }
                 }
             }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            catch (IOException e) { e.printStackTrace(); }
 
             FileSplitter.SplitFile splitFile = null;
             try
             {
                 splitFile = splitFileTask.get(); // Get our split file from earlier future
             }
-            catch (InterruptedException | ExecutionException e)
-            {
-                e.printStackTrace();
-            }
+            catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
 
-            // Currently stops here, handshake is working
-            if(splitFile != null)
-            {
-                return;
-            }
 
             String prefix = splitFile.getSplitPrefix();
             for (int i = 0; i < splitFile.getSplitCount(); i++)
             {
                 // send each split
-                File segment = new File(prefix + i + ".mp4");
+                try
+                {
+                    videoStream.writeObject(new StreamSegment(new File("tmp/" + prefix + i + ".mp4")));
+                    System.out.println("Successfully sent a segment");
+                    Thread.sleep(25000);
+                }
+                catch (IOException | InterruptedException e) { e.printStackTrace(); }
 
                 // wait to simulate stream fetch
             }
@@ -146,11 +139,9 @@ public class StartStreamRequest extends Request
                 dataIn.close();
                 dataOut.close();
                 videoStream.close();
+                new File("tmp/").delete();
             }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            catch (IOException e) { e.printStackTrace(); }
         };
         new Thread(request).start();
     }

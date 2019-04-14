@@ -5,7 +5,9 @@ import lib.StreamSegment;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /*
 All client connections first spawn this handler to
@@ -18,9 +20,8 @@ public class InitialConnectionHandler implements Runnable
     private String streamTitle;
     private ConcurrentHashMap<String,Long> streamingClients;
     private ConcurrentHashMap<String,Long> watchingClients;
-
-    // Pair is streamer name, and stream title
     private ConcurrentHashMap<String, LiveStream> liveStreams;
+    private BlockingDeque<StreamSegment> currentWatchingStream;
 
     private DataInputStream dataIn;
     private DataOutputStream dataOut;
@@ -37,6 +38,7 @@ public class InitialConnectionHandler implements Runnable
         this.streamingClients = streamingClients;
         this.watchingClients = watchingClients;
         this.liveStreams = liveStreams;
+        currentWatchingStream = new LinkedBlockingDeque<>();
     }
 
     @Override
@@ -127,8 +129,7 @@ public class InitialConnectionHandler implements Runnable
                             // Add client name and ID to Server watchingMap
                             watchingClients.put(clientName, Thread.currentThread().getId());
                             System.out.println("Calling watchStream(toWatch)");
-                            // TODO - write watchStream(toWatch)
-                            // watchStream(toWatch);
+                             watchStream(toWatch);
                         }
                         else
                         {
@@ -166,6 +167,7 @@ public class InitialConnectionHandler implements Runnable
 
     private void startStream(String name)
     {
+        // New livestream
         LiveStream myStream = new LiveStream();
 
         // Concurrent HashMap guarantees happens-before relationship for safe-publication
@@ -179,10 +181,7 @@ public class InitialConnectionHandler implements Runnable
             dataOut.writeUTF("ready");
             dataOut.flush();
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        catch (IOException e) { e.printStackTrace(); }
 
         // Stream now ready
         StreamSegment receivedSegment;
@@ -196,15 +195,34 @@ public class InitialConnectionHandler implements Runnable
                     myStream.addSegment(receivedSegment);
                 }
             }
-            catch (IOException | ClassNotFoundException e)
-            {
-                e.printStackTrace();
-            }
+            catch (IOException | ClassNotFoundException e) { e.printStackTrace(); }
         }
     }
 
     private void watchStream(String streamName)
     {
+        // Get the stream
+        LiveStream liveStream = liveStreams.get(streamName);
+        liveStream.startViewing(currentWatchingStream);
 
+        ObjectOutputStream videoStream = null;
+
+        try
+        {
+            // Stream to send back to client
+            videoStream = new ObjectOutputStream(returnSocket.getOutputStream());
+        }
+        catch (IOException e) { e.printStackTrace(); }
+
+        while(!Thread.interrupted() && videoStream != null)
+        {
+            try
+            {
+                // This blocks until their is a segment in the queue
+                videoStream.writeObject(currentWatchingStream.take());
+            }
+            // Rethrow the interrupt
+            catch (InterruptedException | IOException e) { Thread.currentThread().interrupt(); }
+        }
     }
 }

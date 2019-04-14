@@ -29,6 +29,7 @@ public class FileSplitter
 
         public SplitFile(File toSplit, MediaPlayer player, Duration timePerSplit)
         {
+            new File("tmp/").mkdirs();
             this.setSplitPrefix(toSplit.getName().substring(0, toSplit.getName().indexOf(".")));
             player.seek(Duration.millis(0));
 
@@ -57,7 +58,7 @@ public class FileSplitter
                         "-i", toSplit.getAbsolutePath(),
                         "-ss", seekTo,
                         "-to", finish,
-                        this.getSplitPrefix() + i + ".mp4"
+                        "tmp/" + this.getSplitPrefix() + i + ".mp4"
                 };
 
                 // On the final split, we need to only split the last part off
@@ -68,7 +69,7 @@ public class FileSplitter
                             "-y",
                             "-i", toSplit.getAbsolutePath(),
                             "-ss", seekTo,
-                            this.getSplitPrefix() + i + ".mp4"
+                            "tmp/" + this.getSplitPrefix() + i + ".mp4"
                     };
                 }
 
