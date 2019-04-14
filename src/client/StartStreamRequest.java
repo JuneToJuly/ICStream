@@ -25,6 +25,7 @@ public class StartStreamRequest extends Request
     private DataOutputStream dataOut;
     private DataInputStream dataIn;
 
+
     public StartStreamRequest(String clientName, String streamTitle, File streamFile)
     {
         this.clientName = clientName;
@@ -69,7 +70,7 @@ public class StartStreamRequest extends Request
                 @Override
                 protected FileSplitter.SplitFile call() throws Exception
                 {
-                    return new FileSplitter.SplitFile(streamFile, player, Duration.seconds(5));
+                    return new FileSplitter.SplitFile(streamFile, player, Duration.seconds(2));
                 }
             };
 
@@ -124,11 +125,9 @@ public class StartStreamRequest extends Request
                 {
                     videoStream.writeObject(new StreamSegment(new File("tmp/" + prefix + i + ".mp4")));
                     System.out.println("Successfully sent a segment");
-                    Thread.sleep(25000);
+                    Thread.sleep(1000);
                 }
-                catch (IOException | InterruptedException e) { e.printStackTrace(); }
-
-                // wait to simulate stream fetch
+                catch (IOException | InterruptedException e) { Thread.currentThread().interrupt(); break; }
             }
 
             try

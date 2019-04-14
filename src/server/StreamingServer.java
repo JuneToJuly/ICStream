@@ -44,7 +44,7 @@ public class StreamingServer
             while(true) {
                 // As soon as communication is received, send info to Handler thread
                 // Include concurrent maps so thread can modify them
-                threadPool.execute(new InitialConnectionHandler(serverSocket.accept(), streamingClients, watchingClients, liveStreams, toWatch));
+                threadPool.execute(new InitialConnectionHandler(serverSocket.accept(), streamingClients, watchingClients, liveStreams));
             }
 
         }

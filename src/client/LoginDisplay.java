@@ -81,7 +81,8 @@ public class LoginDisplay
                 Socket socket = new Socket();
                 curStreamReq = new CurrentStreamsRequest(username);
                 curStreamReq.buildRequest(socket);
-                String streamsStr = curStreamReq.sendStringRequest();
+                curStreamReq.sendRequest();
+                String streamsStr = curStreamReq.getResponse();
 
                 // Convert String into list of strings
                 if(!streamsStr.isEmpty())
@@ -106,8 +107,9 @@ public class LoginDisplay
                             System.out.println(s);
                         }
 
-                        Stage watchStage = new Stage();
-                        WatchClientDisplay display = new WatchClientDisplay(watchStage);
+                        // We just pass the current stage. The watch client will then
+                        // just remove the current scene and add its own scene
+                        WatchClientDisplay display = new WatchClientDisplay(stage);
                         display.show();
                     }
                 }
