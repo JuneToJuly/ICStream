@@ -11,6 +11,7 @@ public class CurrentStreamsRequest extends Request
     // Global BufferedReaders + Writers will be used for actual stream
     private DataOutputStream dataOut;
     private DataInputStream dataIn;
+    private String response;
 
     public CurrentStreamsRequest(String clientName)
     {
@@ -27,14 +28,6 @@ public class CurrentStreamsRequest extends Request
     @Override
     public void sendRequest()
     {
-
-    }
-
-    // Required String return because Server must return
-    // active streams back to the client
-    public String sendStringRequest()
-    {
-        String response = "";
         try
         {
             // First connect to client
@@ -65,7 +58,12 @@ public class CurrentStreamsRequest extends Request
         {
             e.printStackTrace();
         }
+    }
 
+    // Required String return because Server must return
+    // active streams back to the client
+    public String getResponse()
+    {
         return response;
     }
 }

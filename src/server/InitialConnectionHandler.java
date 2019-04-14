@@ -30,11 +30,9 @@ public class InitialConnectionHandler implements Runnable
     public InitialConnectionHandler(Socket socket,
                                     ConcurrentHashMap<String,Long> streamingClients,
                                     ConcurrentHashMap<String,Long> watchingClients,
-                                    ConcurrentHashMap<String, LiveStream> liveStreams,
-                                    String toWatch)
+                                    ConcurrentHashMap<String, LiveStream> liveStreams)
     {
         this.returnSocket = socket;
-        this.toWatch = toWatch;
         this.streamingClients = streamingClients;
         this.watchingClients = watchingClients;
         this.liveStreams = liveStreams;
@@ -124,12 +122,12 @@ public class InitialConnectionHandler implements Runnable
                     // Client would like to view a specific stream
                     case 201:
                         System.out.println("Handling viewStream()");
-                        if(!streamingClients.containsKey(toWatch))
+                        if(streamingClients.containsKey("ina"))
                         {
                             // Add client name and ID to Server watchingMap
                             watchingClients.put(clientName, Thread.currentThread().getId());
                             System.out.println("Calling watchStream(toWatch)");
-                             watchStream(toWatch);
+                            watchStream("ina");
                         }
                         else
                         {
@@ -201,8 +199,11 @@ public class InitialConnectionHandler implements Runnable
 
     private void watchStream(String streamName)
     {
+        System.out.println("HELLLO");
         // Get the stream
         LiveStream liveStream = liveStreams.get(streamName);
+        System.out.println(streamName);
+        System.out.println(liveStreams.keys().toString());
         liveStream.startViewing(currentWatchingStream);
 
         ObjectOutputStream videoStream = null;

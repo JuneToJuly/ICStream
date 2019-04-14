@@ -1,9 +1,11 @@
 package lib;
 
+import javafx.scene.media.MediaPlayer;
 import jdk.nashorn.internal.ir.annotations.Immutable;
 
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @Immutable
 /**
@@ -14,15 +16,60 @@ import java.io.Serializable;
  */
 public final class StreamSegment implements Serializable
 {
-    private final File segment;
+    private final byte[] segment;
+    private final File file;
 
-    public StreamSegment(File segment)
+    /**
+        We simply read the whole file into our buffer.
+     */
+    public StreamSegment(File file)
     {
-        this.segment = segment;
+        this.file = file;
+        long size = file.length();
+        InputStream source;
+        segment = new byte[(int)size];
+
+        int nread;
+        int next;
+
+        if (size > Integer.MAX_VALUE) {
+            System.out.println("File size too large");
+        }
+
+        try
+        {
+            source = new FileInputStream(file);
+            for (next = 0; next < segment.length; next += nread) {
+                nread = source.read(segment, next, segment.length - next);
+                if (nread < 0) {
+                    System.out.println("Failed to read");
+                }
+            }
+            if (source.read() != -1) {
+                System.out.println("Failed to read");
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
-    public File getSegment()
+    /**
+     Call this for getting a file as a stream segment.
+     @return MediaPlayer representing that segment
+     */
+    public MediaPlayer getSegment()
     {
-        return segment;
+        try
+        {
+            // Write file to tmp directory, need to clean this up after exit
+            FileOutputStream outputStream = new FileOutputStream(file);
+            Files.write(Paths.get(file.getPath()), segment);
+        }
+        catch (IOException e) { e.printStackTrace(); }
+
+        return Stream.playerFromFile(file);
     }
 }
