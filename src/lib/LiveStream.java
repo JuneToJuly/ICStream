@@ -1,8 +1,9 @@
 package lib;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  We want a stream view to be able to access a stream's live stream.
@@ -11,15 +12,18 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class LiveStream
 {
-    // Yeah this is stupid but for now it is fine
     // Only one thread will be updating these values
-    private AtomicReference<StreamSegment> currentSegment;
-    private StreamSegment nextSegment;
-    private StreamSegment nextNextSegment;
+    private Deque<StreamSegment> segments;
 
     // Register viewers, if we have a ton of viewers might as well just synchronize the array
     // Always have a correct copy when we send out a segment though.
-    private CopyOnWriteArrayList<BlockingDeque<StreamSegment>> viewers = new CopyOnWriteArrayList();
+    private CopyOnWriteArrayList<BlockingDeque<StreamSegment>> viewers;
+
+    public LiveStream()
+    {
+        segments = new ArrayDeque<>();
+        viewers = new CopyOnWriteArrayList<>();
+    }
 
     /**
      Viewers will join the livestream view this method call. The simply add their blocking
@@ -37,10 +41,7 @@ public class LiveStream
      */
     public synchronized void addSegment(StreamSegment newSegment)
     {
-        currentSegment.set(nextSegment);
-        nextSegment = nextNextSegment;
-        nextNextSegment = newSegment;
-
+        segments.add(newSegment);
         notifyViewers();
     }
 
@@ -49,8 +50,16 @@ public class LiveStream
         // For each viewer pass them the new current segment
         for (BlockingDeque<StreamSegment> viewer: viewers)
         {
-            // Immutable object is passed that is fine for concurrent access
-            viewer.add(currentSegment.get());
+            if(segments.size() <= 1)
+            {
+                // We wan't to build up a buffer of about 1
+                break;
+            }
+            else
+            {
+                // Immutable object is passed and this is fine for concurrent access
+                viewer.add(segments.poll());
+            }
         }
     }
 }
