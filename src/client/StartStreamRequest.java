@@ -1,6 +1,7 @@
 package client;
 
 import client.interfaces.Request;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.media.MediaPlayer;
@@ -10,11 +11,12 @@ import lib.FileSplitter;
 import lib.Stream;
 import lib.StreamSegment;
 
+import java.awt.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.Deque;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class StartStreamRequest extends Request
 {
@@ -98,12 +100,21 @@ public class StartStreamRequest extends Request
                     }
                     else // Name not unique, need another name
                     {
-                        TextInputDialog dialog = new TextInputDialog();
-                        Optional<String> newName = null;
-                        while (newName == null || !newName.isPresent())
+                        String name = "";
+                        ArrayBlockingQueue<String> nameQ = new ArrayBlockingQueue<String>(1);
+                        Platform.runLater(() ->
                         {
-                            newName = dialog.showAndWait();
-                        }
+                            try { nameQ.put(new TextInputDialog("Enter New Name").showAndWait().get()); }
+                            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                        });
+
+                        // Blocks
+                        try { nameQ.take(); }
+                        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
+                        dataOut.writeInt(requestType);
+                        dataOut.writeUTF(name);
+                        dataOut.flush();
                     }
                 }
             }
@@ -127,20 +138,9 @@ public class StartStreamRequest extends Request
                     System.out.println("Successfully sent a segment");
                     Thread.sleep(1000);
                 }
-                catch (IOException | InterruptedException e) { Thread.currentThread().interrupt(); break; }
+                catch (IOException | InterruptedException e) { e.printStackTrace(); Thread.currentThread().interrupt(); break; }
             }
 
-            try
-            {
-                toSendSocket.close();
-                br.close();
-                bw.close();
-                dataIn.close();
-                dataOut.close();
-                videoStream.close();
-                new File("tmp/").delete();
-            }
-            catch (IOException e) { e.printStackTrace(); }
         };
         new Thread(request).start();
     }

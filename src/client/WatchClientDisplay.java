@@ -25,26 +25,27 @@ public class WatchClientDisplay
     private void buildDisplay()
     {
         FlowPane pane = new FlowPane();
-        TextField streamText = new TextField();
+        TextField streamText = new TextField("Streamer to Watch");
+        TextField clientNameText = new TextField("Client Name");
         Button b_startStream = new Button("Start Stream");
         Button b_stopStream = new Button("Stop Stream");
 
         StreamView streamView = new StreamView();
-        pane.getChildren().addAll(b_startStream, streamText, b_stopStream, streamView);
+        pane.getChildren().addAll(clientNameText, b_startStream, streamText, b_stopStream, streamView);
 
-        addListeners(b_startStream, b_stopStream, streamView, streamText);
-        scene = new Scene(pane);
+        addListeners(b_startStream, b_stopStream, streamView, streamText, clientNameText);
+        scene = new Scene(pane, 500, 240);
         stage.setScene(scene);
         stage.setOnCloseRequest(event -> Platform.exit());
     }
 
     private void addListeners(Button b_startStream, Button b_stopStream, StreamView streamView,
-                              TextField streamText)
+                              TextField streamText, TextField clientNameText)
     {
         b_startStream.setOnAction(e ->
         {
             Socket socket = new Socket();
-            viewStreamReq = new ViewStreamRequest(streamText.getText(), streamView);
+            viewStreamReq = new ViewStreamRequest(clientNameText.getText(), streamText.getText(), streamView);
             viewStreamReq.buildRequest(socket);
             viewStreamReq.sendRequest();
         });

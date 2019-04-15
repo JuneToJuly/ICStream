@@ -5,7 +5,6 @@ import javafx.application.Platform;
 import lib.StreamSegment;
 import lib.StreamView;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,14 +13,15 @@ import java.net.Socket;
 public class ViewStreamRequest extends Request
 {
     private String streamName;
+    private String clientName;
     private DataOutputStream dataOut;
-    private DataInputStream dataIn;
     private int reqestType;
     private ObjectInputStream videoStream;
     private StreamView streamView;
 
-    public ViewStreamRequest(String streamName, StreamView view)
+    public ViewStreamRequest(String clientName, String streamName, StreamView view)
     {
+        this.clientName = clientName;
         this.streamName = streamName;
         this.streamView = view;
         reqestType = 201;
@@ -46,7 +46,9 @@ public class ViewStreamRequest extends Request
                 dataOut = new DataOutputStream(toSendSocket.getOutputStream());
 
                 dataOut.writeInt(reqestType);
+                dataOut.writeUTF(clientName);
                 dataOut.writeUTF(streamName);
+                dataOut.flush();
 
                 videoStream = new ObjectInputStream(toSendSocket.getInputStream());
 

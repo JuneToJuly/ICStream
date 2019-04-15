@@ -121,13 +121,14 @@ public class InitialConnectionHandler implements Runnable
 
                     // Client would like to view a specific stream
                     case 201:
+                        String toWatch = dataIn.readUTF();
                         System.out.println("Handling viewStream()");
-                        if(streamingClients.containsKey("ina"))
+                        if(streamingClients.containsKey(toWatch))
                         {
                             // Add client name and ID to Server watchingMap
                             watchingClients.put(clientName, Thread.currentThread().getId());
                             System.out.println("Calling watchStream(toWatch)");
-                            watchStream("ina");
+                            watchStream(toWatch);
                         }
                         else
                         {
@@ -153,9 +154,6 @@ public class InitialConnectionHandler implements Runnable
                 System.out.println("Error in extracting ClientName. Try again.");
                 dataOut.writeUTF("Error in extracting ClientName. Try again.");
             }
-
-            dataOut.close();
-            dataIn.close();
         }
         catch (IOException e)
         {
@@ -193,8 +191,9 @@ public class InitialConnectionHandler implements Runnable
                     myStream.addSegment(receivedSegment);
                 }
             }
-            catch (IOException | ClassNotFoundException e) { e.printStackTrace(); }
+            catch (IOException | ClassNotFoundException e) { break; }
         }
+        liveStreams.remove(name);
     }
 
     private void watchStream(String streamName)
