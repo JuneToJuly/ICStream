@@ -30,14 +30,15 @@ public class LiveStream
      queue to this stream. When a segment becomes available, we will put in all queues
      @param viewer
      */
-    public void startViewing(BlockingDeque<StreamSegment> viewer)
+    public void startViewing(String viewerName, String streamerName, BlockingDeque<StreamSegment> viewerQueue)
     {
-        viewers.add(viewer);
+        System.out.println("Adding " + viewerName + " to Stream: " + streamerName);
+        viewers.add(viewerQueue);
     }
 
     /**
      This is intended only for the streamer...but I'm too lazy to enforce this.
-     @param newSegment
+     @param newSegment segment to be added
      */
     public synchronized void addSegment(StreamSegment newSegment)
     {

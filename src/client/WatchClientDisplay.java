@@ -65,7 +65,7 @@ public class WatchClientDisplay
         HBox hBox = new HBox(ws1, sideBar, ws2, viewArea);
 
         addListeners(viewButton, streamButton, radioGroup, streamView);
-        scene = new Scene(hBox, 800, 400);
+        scene = new Scene(hBox, 850, 400);
         stage.setScene(scene);
         stage.show();
 //        FlowPane pane = new FlowPane();

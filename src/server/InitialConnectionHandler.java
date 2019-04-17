@@ -16,7 +16,6 @@ determine the type of client.
 public class InitialConnectionHandler implements Runnable
 {
     private Socket returnSocket;
-    private String streamTitle;
     private ConcurrentHashMap<String,Long> streamingClients;
     private ConcurrentHashMap<String,Long> watchingClients;
     private ConcurrentHashMap<String, LiveStream> liveStreams;
@@ -47,6 +46,9 @@ public class InitialConnectionHandler implements Runnable
         int clientType;
         String clientName;
 
+        String streamerName;
+        String viewerName;
+
         try
         {
             // Receive client type and name
@@ -66,13 +68,14 @@ public class InitialConnectionHandler implements Runnable
                 {
                     // Client would like to start Streaming
                     case 100:
+                        streamerName = clientName;
                         System.out.println("Handling streamStart()");
-                        if(!streamingClients.containsKey(clientName))
+                        if(!streamingClients.containsKey(streamerName))
                         {
                             // Add client name and ID to Server streamingMap
-                            streamingClients.put(clientName, Thread.currentThread().getId());
+                            streamingClients.put(streamerName, Thread.currentThread().getId());
                             System.out.println("Calling startStream()");
-                            startStream(clientName);
+                            startStream(streamerName);
                         }
                         else
                         {
@@ -84,13 +87,13 @@ public class InitialConnectionHandler implements Runnable
 
                     // Client would like to know who is currently streaming
                     case 200:
+                        viewerName = clientName;
                         System.out.println("Handling whoIsStreaming()");
-                        System.out.println("Client name: " + clientName);
+                        System.out.println("Client name: " + viewerName);
                         // Fake viewer for testing purposes TODO comment later
-                        watchingClients.put("Alexis", Thread.currentThread().getId());
 
                         // Make sure viewer name is unique
-                        if(watchingClients.containsKey(clientName))
+                        if(watchingClients.containsKey(viewerName))
                         {
                             System.out.println("Name already viewing.");
                             dataOut.writeUTF("non-unique name");
@@ -120,14 +123,15 @@ public class InitialConnectionHandler implements Runnable
 
                     // Client would like to view a specific stream
                     case 201:
-                        String streamerName = dataIn.readUTF();
+                        viewerName = clientName;
+                        streamerName = dataIn.readUTF();
                         System.out.println("Handling viewStream()");
                         if(streamingClients.containsKey(streamerName))
                         {
                             // Add client name and ID to Server watchingMap
-                            watchingClients.put(clientName, Thread.currentThread().getId());
+                            watchingClients.put(viewerName, Thread.currentThread().getId());
                             System.out.println("Calling watchStream(toWatch)");
-                            watchStream(streamerName);
+                            watchStream(viewerName, streamerName);
                         }
                         else
                         {
@@ -186,7 +190,9 @@ public class InitialConnectionHandler implements Runnable
             {
                 if(videoStream != null)
                 {
+                    System.out.println("Receiving segment...");
                     receivedSegment = (StreamSegment) videoStream.readObject();
+                    System.out.println("Segment: " + receivedSegment.toString());
                     myStream.addSegment(receivedSegment);
                 }
             }
@@ -195,13 +201,13 @@ public class InitialConnectionHandler implements Runnable
         liveStreams.remove(name);
     }
 
-    private void watchStream(String streamName)
+    private void watchStream(String viewerName, String streamerName)
     {
+        System.out.println("watchStream() called for thread: " + Thread.currentThread().getId());
         // Get the stream
-        LiveStream liveStream = liveStreams.get(streamName);
-        System.out.println(streamName);
-        System.out.println(liveStreams.keys().toString());
-        liveStream.startViewing(currentWatchingStream);
+        LiveStream liveStream = liveStreams.get(streamerName);
+        System.out.println("Setting up stream: " + streamerName);
+        liveStream.startViewing(viewerName, streamerName, currentWatchingStream);
 
         ObjectOutputStream videoStream = null;
 
@@ -209,15 +215,20 @@ public class InitialConnectionHandler implements Runnable
         {
             // Stream to send back to client
             videoStream = new ObjectOutputStream(returnSocket.getOutputStream());
+            System.out.println("Opened socket back to viewer.");
         }
         catch (IOException e) { e.printStackTrace(); }
 
-        while(!Thread.interrupted() && videoStream != null)
+        while(!Thread.interrupted())
         {
             try
             {
+                if(videoStream == null) break;
+
                 // This blocks until their is a segment in the queue
+                System.out.println("Blocking until segment is in queue...");
                 videoStream.writeObject(currentWatchingStream.take());
+                System.out.println("Sent segment to client.");
             }
             // Rethrow the interrupt
             catch (InterruptedException | IOException e) { Thread.currentThread().interrupt(); }
