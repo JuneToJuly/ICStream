@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import lib.Constants;
 import lib.Stream;
 import lib.StreamView;
 
@@ -17,11 +18,11 @@ public class PlayTest extends Application
     {
         StreamView view = new StreamView();
 
-        File file = new File("K:/git/ICStream/resources/sample_video/test0.mp4");
-        File file1 = new File("K:/git/ICStream/resources/sample_video/test1.mp4");
-        File file2 = new File("K:/git/ICStream/resources/sample_video/test2.mp4");
-        File file3 = new File("K:/git/ICStream/resources/sample_video/test3.mp4");
-        File file4 = new File("K:/git/ICStream/resources/sample_video/test4.mp4");
+        File file = new File(Constants.PLAYTEST_TEST0);
+        File file1 = new File(Constants.PLAYTEST_TEST1);
+        File file2 = new File(Constants.PLAYTEST_TEST2);
+        File file3 = new File(Constants.PLAYTEST_TEST3);
+        File file4 = new File(Constants.PLAYTEST_TEST4);
 
         view.queueMediaPlayer(Stream.playerFromFile(file));
         view.queueMediaPlayer(Stream.playerFromFile(file1));

@@ -10,6 +10,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import lib.Constants;
 import lib.FileSplitter;
 
 import java.io.File;
@@ -25,7 +26,7 @@ public class SplitTest extends Application
     public void start(Stage primaryStage) throws Exception
     {
         Button butt = new Button("SplitFile");
-        File file = new File("K:/git/ICStream/resources/sample_video/test.mp4");
+        File file = new File(Constants.SPLITTEST_FILE);
         Media media = new Media(file.toURI().toString());
         MediaPlayer player = new MediaPlayer(media);
 

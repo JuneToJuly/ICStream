@@ -2,3 +2,4 @@
 /out
 *.iml
 /resources/sample_video
+/src/lib/Constants.java

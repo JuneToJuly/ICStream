@@ -12,8 +12,6 @@ import java.io.*;
  */
 public class FileSplitter
 {
-    public static String FFMPEG_PATH = "K:\\Downloads\\ffmpeg-20190410-4d2f621-win64-static\\ffmpeg-20190410-4d2f621-win64-static\\bin\\ffmpeg.exe";
-
     public static SplitFile splitFile(File toSplit, MediaPlayer player, Duration timePerSplit)
     {
         return new SplitFile(toSplit, player, timePerSplit);
@@ -53,7 +51,7 @@ public class FileSplitter
 
                 // Cmd for splitting
                 String[] cmd = {
-                        FFMPEG_PATH,
+                        Constants.FFMPEG_PATH,
                         "-y",
                         "-i", toSplit.getAbsolutePath(),
                         "-ss", seekTo,
@@ -65,7 +63,7 @@ public class FileSplitter
                 if(i+1 == this.getSplitCount())
                 {
                     cmd = new String[]{
-                            FFMPEG_PATH,
+                            Constants.FFMPEG_PATH,
                             "-y",
                             "-i", toSplit.getAbsolutePath(),
                             "-ss", seekTo,
