@@ -100,8 +100,8 @@ public class InitialConnectionHandler implements Runnable
                         }
 
                         // Fake streamers for testing purposes TODO comment later
-                        streamingClients.put("Chris", Thread.currentThread().getId());
-                        streamingClients.put("Ian", Thread.currentThread().getId() + 1);
+//                        streamingClients.put("Chris", Thread.currentThread().getId());
+//                        streamingClients.put("Ian", Thread.currentThread().getId() + 1);
                         if(!streamingClients.isEmpty())
                         {
                             System.out.println("The following streamers are active: " +
@@ -198,7 +198,6 @@ public class InitialConnectionHandler implements Runnable
 
     private void watchStream(String streamName)
     {
-        System.out.println("HELLLO");
         // Get the stream
         LiveStream liveStream = liveStreams.get(streamName);
         System.out.println(streamName);

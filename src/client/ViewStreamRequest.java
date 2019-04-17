@@ -2,10 +2,12 @@ package client;
 
 import client.interfaces.Request;
 import javafx.application.Platform;
+import javafx.scene.media.MediaPlayer;
 import lib.StreamSegment;
 import lib.StreamView;
 
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
@@ -15,7 +17,7 @@ public class ViewStreamRequest extends Request
     private String streamName;
     private String clientName;
     private DataOutputStream dataOut;
-    private int reqestType;
+    private int requestType;
     private ObjectInputStream videoStream;
     private StreamView streamView;
 
@@ -24,7 +26,7 @@ public class ViewStreamRequest extends Request
         this.clientName = clientName;
         this.streamName = streamName;
         this.streamView = view;
-        reqestType = 201;
+        requestType = 201;
     }
 
     @Override
@@ -41,11 +43,12 @@ public class ViewStreamRequest extends Request
         {
             try
             {
+                // Connect to server, open communication stream
                 toSendSocket.connect(streamingServer);
-
                 dataOut = new DataOutputStream(toSendSocket.getOutputStream());
 
-                dataOut.writeInt(reqestType);
+                // Send the server your clientType (WATCH) and name
+                dataOut.writeInt(requestType);
                 dataOut.writeUTF(clientName);
                 dataOut.writeUTF(streamName);
                 dataOut.flush();
@@ -54,13 +57,13 @@ public class ViewStreamRequest extends Request
 
                 while(!Thread.interrupted())
                 {
-
+                    // Read segment from stream
                     StreamSegment segment = (StreamSegment) videoStream.readObject();
-                    System.out.println("Got a segement!");
-
                     Platform.runLater(() ->
                     {
-                        streamView.queueMediaPlayer(segment.getSegment());
+                        // Write new segment file
+                        MediaPlayer player = segment.getSegment();
+                        streamView.queueMediaPlayer(player);
                     });
                 }
             }

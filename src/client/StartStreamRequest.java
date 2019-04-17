@@ -134,7 +134,7 @@ public class StartStreamRequest extends Request
                 // send each split
                 try
                 {
-                    videoStream.writeObject(new StreamSegment(new File("tmp/" + prefix + i + ".mp4")));
+                    videoStream.writeObject(new StreamSegment(new File("tmp_local/" + prefix + i + ".mp4"), i));
                     System.out.println("Successfully sent a segment");
                     Thread.sleep(1000);
                 }

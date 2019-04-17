@@ -5,6 +5,7 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Immutable
@@ -18,16 +19,18 @@ public final class StreamSegment implements Serializable
 {
     private final byte[] segment;
     private final File file;
+    private int segCount;
 
     /**
         We simply read the whole file into our buffer.
      */
-    public StreamSegment(File file)
+    public StreamSegment(File file, int count)
     {
         this.file = file;
         long size = file.length();
         InputStream source;
-        segment = new byte[(int)size];
+        this.segment = new byte[(int)size];
+        this.segCount = count;
 
         int nread;
         int next;
@@ -64,9 +67,14 @@ public final class StreamSegment implements Serializable
     {
         try
         {
-            // Write file to tmp directory, need to clean this up after exit
-            FileOutputStream outputStream = new FileOutputStream(file);
-            Files.write(Paths.get(file.getPath()), segment);
+            // Create a new directory for segments this client/thread receives
+            File outDir = new File(Constants.VIEWFILES_PATH + Thread.currentThread().getId());
+            if(!outDir.exists()) outDir.mkdirs();
+
+            // Write new file for each segment to this directory
+            File outFile = new File(outDir + "\\out_" + segCount + ".mp4");
+            Files.write(Paths.get(outFile.getPath()), segment);
+            System.out.println("Writing new file: " + outDir.toString() + "\\out_" + segCount + ".mp4");
         }
         catch (IOException e) { e.printStackTrace(); }
 
