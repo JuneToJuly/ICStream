@@ -1,23 +1,19 @@
 # ICStream
 
-#### Client Logic/Roadmap
-StreamClient
-* Client type that is broadcasting/streaming.
-* GUI: ????
-* When this type of client is launched, it sends a request to the server to stream. (StartStreamRequest id = 100)
-* It must provide a name (string).
-* The server stores a streamerMap<ThreadID, name>, and immediately checks if the name is unique.
-* If unique, the server assigns a thread from its streamerPool to the client, and stores that pair in its map.
-* If not unique, responds with appropriate correction/suggestion.
-* Once name is valid, connects to socket and begins sending file chunks.
+## Team Members
+### Chris Dixon | 12143158
+Github: Dixonnn/Chris Dixon
+* For some reason, when pushing code through the IntelliJ IDE, it registered my contributor name as 'Chris Dixon', but when editing the repo directly or merging pull requests it lists me as 'Dixonnn', my account name.
 
-WatchClient
-* Client type that is consuming another broadcast.
-* GUI: Section to select from connected StreamClients, MediaPlayer for once connected
-* First request: connect to server, provide unique name (CurrentStreamsRequest id = 200)
-* Response: Checks if name is unique, if so provides list of currently streaming StreamClients
-* Second Request: choose StreamClient to watch (ViewStreamRequest id = 201)
-* Response: begin broadcasting chosen StreamClient to MediaPlayer
+### Ian Thomas | ********
+Github: JuneToJuly
 
-Notes
-* So, the server will contain two ThreadPools and two maps for the names of the clients corresponding to active threads in each pool
+## Member Contributions
+
+
+## Project Description (3-4 Sentences)
+ICStream is a basic video live-streaming service that allows users to either broadcast or view video. It falls under 
+the client-server architecture: streamer clients push video to the server, and the server then pushes that video to viewer clients. The app requires a degree of concurrency that would allow multiple viewers to consume one streamer's content at the same time, as well as allow multiple independent streamers to simultaneously push their video content to a single server. In popular culture, live streaming applications have become staples of social media, video game entertainment, virtual meetings, and more. 
+
+## Building and Running
+Throughout the development of the project, we have utilized IntelliJ's run configurations to build and run the app directly in our IDEs. This coupled with the fact that the app relies on local video files and an MP4 modification executable (also local), it would be difficult to replicate and run the project on one's own. For this reason, we have scheduled an office demonstration.
