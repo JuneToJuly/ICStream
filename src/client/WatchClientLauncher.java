@@ -8,7 +8,8 @@ public class WatchClientLauncher extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        WatchClientDisplay display = new WatchClientDisplay(primaryStage);
+        String[] arr = {"Chris", "Jack", "Tony", "Carl"};
+        WatchClientDisplay display = new WatchClientDisplay(primaryStage, arr, "username");
         display.show();
     }
 

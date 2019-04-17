@@ -14,17 +14,17 @@ import java.net.Socket;
 
 public class ViewStreamRequest extends Request
 {
-    private String streamName;
-    private String clientName;
+    private String viewerName;
+    private String streamerName;
     private DataOutputStream dataOut;
     private int requestType;
     private ObjectInputStream videoStream;
     private StreamView streamView;
 
-    public ViewStreamRequest(String clientName, String streamName, StreamView view)
+    public ViewStreamRequest(String viewerName, String streamerName, StreamView view)
     {
-        this.clientName = clientName;
-        this.streamName = streamName;
+        this.viewerName = viewerName;
+        this.streamerName = streamerName;
         this.streamView = view;
         requestType = 201;
     }
@@ -47,10 +47,10 @@ public class ViewStreamRequest extends Request
                 toSendSocket.connect(streamingServer);
                 dataOut = new DataOutputStream(toSendSocket.getOutputStream());
 
-                // Send the server your clientType (WATCH) and name
+                // Send the server your clientType (WATCH), name, and who you want to watch
                 dataOut.writeInt(requestType);
-                dataOut.writeUTF(clientName);
-                dataOut.writeUTF(streamName);
+                dataOut.writeUTF(viewerName);
+                dataOut.writeUTF(streamerName);
                 dataOut.flush();
 
                 videoStream = new ObjectInputStream(toSendSocket.getInputStream());
