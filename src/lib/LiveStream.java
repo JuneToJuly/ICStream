@@ -28,7 +28,6 @@ public class LiveStream
     /**
      Viewers will join the livestream view this method call. The simply add their blocking
      queue to this stream. When a segment becomes available, we will put in all queues
-     @param viewer
      */
     public void startViewing(String viewerName, String streamerName, BlockingDeque<StreamSegment> viewerQueue)
     {
@@ -46,21 +45,37 @@ public class LiveStream
         notifyViewers();
     }
 
+//    private void notifyViewers()
+//    {
+//        // For each viewer pass them the new current segment
+//        for (BlockingDeque<StreamSegment> viewer: viewers)
+//        {
+//            if(segments.size() <= 1)
+//            {
+//                // We wan't to build up a buffer of about 1
+//                break;
+//            }
+//            else
+//            {
+//                // Immutable object is passed and this is fine for concurrent access
+//
+//                viewer.add(segments.poll());
+//            }
+//        }
+//    }
+
     private void notifyViewers()
     {
+        StreamSegment segment = segments.poll();
         // For each viewer pass them the new current segment
         for (BlockingDeque<StreamSegment> viewer: viewers)
         {
-            if(segments.size() <= 1)
-            {
-                // We wan't to build up a buffer of about 1
-                break;
-            }
-            else
-            {
-                // Immutable object is passed and this is fine for concurrent access
-                viewer.add(segments.poll());
-            }
+            // Immutable object is passed and this is fine for concurrent access
+            // BUG, this removes the segment from the buffer
+            // need to use a method that just looks at the front item
+            // after all segments have been added, simply call poll the get rid of segment.
+            viewer.add(segment);
+            // viewer.add(segments.poll());
         }
     }
 }

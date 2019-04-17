@@ -20,6 +20,7 @@ public final class StreamSegment implements Serializable
     private final byte[] segment;
     private final File file;
     private int segCount;
+    private String viewerName;
 
     /**
         We simply read the whole file into our buffer.
@@ -68,7 +69,7 @@ public final class StreamSegment implements Serializable
         try
         {
             // Create a new directory for segments this client/thread receives
-            File outDir = new File(Constants.VIEWFILES_PATH + Thread.currentThread().getId());
+            File outDir = new File(Constants.VIEWFILES_PATH + viewerName);
             if(!outDir.exists()) outDir.mkdirs();
 
             // Write new file for each segment to this directory
@@ -79,5 +80,10 @@ public final class StreamSegment implements Serializable
         catch (IOException e) { e.printStackTrace(); }
 
         return Stream.playerFromFile(file);
+    }
+
+    // Simple setter so the segment knows where it's going
+    public void setViewerName(String viewerName) {
+        this.viewerName = viewerName;
     }
 }

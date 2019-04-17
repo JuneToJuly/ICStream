@@ -59,6 +59,8 @@ public class ViewStreamRequest extends Request
                 {
                     // Read segment from stream
                     StreamSegment segment = (StreamSegment) videoStream.readObject();
+                    // Pass viewer's name so correct directory is made
+                    segment.setViewerName(viewerName);
                     Platform.runLater(() ->
                     {
                         // Write new segment file
