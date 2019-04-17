@@ -27,34 +27,33 @@ public class LoginDisplay
 
     private void buildDisplay()
     {
-        stage.setTitle("Streaming Service: Login");
+        stage.setTitle("ICStream - Login");
 
-        Label label = new Label("Your name: ");
+        Label label = new Label("Username: ");
         TextField textField = new TextField();
         HBox hBox1 = new HBox(10, label, textField);
         hBox1.setAlignment(Pos.CENTER);
 
-        Label label1 = new Label("Stream Name: ");
-        TextField textField1 = new TextField();
-        HBox hBox2 = new HBox(10, label1, textField1);
-        hBox2.setAlignment(Pos.CENTER);
+//        Label label1 = new Label("Stream Name: ");
+//        TextField textField1 = new TextField();
+//        HBox hBox2 = new HBox(10, label1, textField1);
+//        hBox2.setAlignment(Pos.CENTER);
 
-        Button b_view = new Button("View");
-        Button b_stream = new Button("Stream");
-        HBox hBox3 = new HBox(20, b_view, b_stream);
+        Button b_view = new Button("Launch");
+        HBox hBox3 = new HBox(20, b_view);
         hBox3.setAlignment(Pos.CENTER);
 
-        VBox vBox = new VBox(20, hBox1, hBox2, hBox3);
+        VBox vBox = new VBox(20, hBox1, hBox3);
         vBox.setAlignment(Pos.CENTER);
 
-        addListeners(b_view, b_stream, textField, textField1);
+        addListeners(b_view, textField);
 
-        Scene scene = new Scene(vBox, 500, 250);
+        Scene scene = new Scene(vBox, 375, 200);
         stage.setScene(scene);
         stage.show();
     }
 
-    private void addListeners(Button b_view, Button b_stream, TextField t_name, TextField t_stream)
+    private void addListeners(Button b_view, TextField t_name)
     {
         b_view.setOnAction(event ->
         {
@@ -72,7 +71,7 @@ public class LoginDisplay
             alert2.setTitle("Non-Unique Name");
             alert2.setHeaderText(null);
             alert2.setContentText("The username you provided is already being used " +
-                    "by a current viewer. Please try a different name.");
+                    "by a current user. Please try a different name.");
 
             // Make sure a name was entered.
             if(!username.isEmpty())
@@ -109,7 +108,7 @@ public class LoginDisplay
 
                         // We just pass the current stage. The watch client will then
                         // just remove the current scene and add its own scene
-                        WatchClientDisplay display = new WatchClientDisplay(stage);
+                        WatchClientDisplay display = new WatchClientDisplay(stage, activeStreams, username);
                         display.show();
                     }
                 }
@@ -125,35 +124,35 @@ public class LoginDisplay
             }
         });
 
-        b_stream.setOnAction(event ->
-        {
-            // Extract username from textfield
-            String username = t_name.getText();
-            String streamName = t_stream.getText();
-            FileChooser chooser = new FileChooser();
-            File streamFile = chooser.showOpenDialog(stage);
-
-            // Configure alert if name was not entered
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Input Validation");
-            alert.setHeaderText(null);
-            alert.setContentText("Username and Stream Name required to begin streaming.");
-
-            // Make sure a name was entered.
-            if(!username.isEmpty() && !streamName.isEmpty())
-            {
-                // Call request to start streaming
-                Socket socket = new Socket();
-                startStreamReq = new StartStreamRequest(username, streamName, streamFile);
-                startStreamReq.buildRequest(socket);
-                startStreamReq.sendRequest();
-            }
-            else
-            {
-                // They need to provide names to continue
-                alert.showAndWait();
-            }
-        });
+//        b_stream.setOnAction(event ->
+//        {
+//            // Extract username from textfield
+//            String username = t_name.getText();
+//            String streamName = t_stream.getText();
+//            FileChooser chooser = new FileChooser();
+//            File streamFile = chooser.showOpenDialog(stage);
+//
+//            // Configure alert if name was not entered
+//            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//            alert.setTitle("Input Validation");
+//            alert.setHeaderText(null);
+//            alert.setContentText("Username required to begin streaming.");
+//
+//            // Make sure a name was entered.
+//            if(!username.isEmpty() && !streamName.isEmpty())
+//            {
+//                // Call request to start streaming
+//                Socket socket = new Socket();
+//                startStreamReq = new StartStreamRequest(username, streamName, streamFile);
+//                startStreamReq.buildRequest(socket);
+//                startStreamReq.sendRequest();
+//            }
+//            else
+//            {
+//                // They need to provide names to continue
+//                alert.showAndWait();
+//            }
+//        });
 
     }
 

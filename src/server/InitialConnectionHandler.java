@@ -16,7 +16,6 @@ determine the type of client.
 public class InitialConnectionHandler implements Runnable
 {
     private Socket returnSocket;
-    private String toWatch;
     private String streamTitle;
     private ConcurrentHashMap<String,Long> streamingClients;
     private ConcurrentHashMap<String,Long> watchingClients;
@@ -100,8 +99,8 @@ public class InitialConnectionHandler implements Runnable
                         }
 
                         // Fake streamers for testing purposes TODO comment later
-                        streamingClients.put("Chris", Thread.currentThread().getId());
-                        streamingClients.put("Ian", Thread.currentThread().getId() + 1);
+//                        streamingClients.put("Chris", Thread.currentThread().getId());
+//                        streamingClients.put("Ian", Thread.currentThread().getId() + 1);
                         if(!streamingClients.isEmpty())
                         {
                             System.out.println("The following streamers are active: " +
@@ -121,19 +120,19 @@ public class InitialConnectionHandler implements Runnable
 
                     // Client would like to view a specific stream
                     case 201:
-                        String toWatch = dataIn.readUTF();
+                        String streamerName = dataIn.readUTF();
                         System.out.println("Handling viewStream()");
-                        if(streamingClients.containsKey(toWatch))
+                        if(streamingClients.containsKey(streamerName))
                         {
                             // Add client name and ID to Server watchingMap
                             watchingClients.put(clientName, Thread.currentThread().getId());
                             System.out.println("Calling watchStream(toWatch)");
-                            watchStream(toWatch);
+                            watchStream(streamerName);
                         }
                         else
                         {
                             // Stream isn't broadcasting anymore by the time client connected
-                            dataOut.writeUTF("Streamer " + toWatch + " has ended their stream. Try someone else.");
+                            dataOut.writeUTF("Streamer " + streamerName + " has ended their stream. Try someone else.");
                             dataOut.flush();
                         }
                         break;
@@ -198,7 +197,6 @@ public class InitialConnectionHandler implements Runnable
 
     private void watchStream(String streamName)
     {
-        System.out.println("HELLLO");
         // Get the stream
         LiveStream liveStream = liveStreams.get(streamName);
         System.out.println(streamName);

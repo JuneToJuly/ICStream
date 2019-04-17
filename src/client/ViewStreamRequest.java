@@ -2,29 +2,31 @@ package client;
 
 import client.interfaces.Request;
 import javafx.application.Platform;
+import javafx.scene.media.MediaPlayer;
 import lib.StreamSegment;
 import lib.StreamView;
 
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
 public class ViewStreamRequest extends Request
 {
-    private String streamName;
-    private String clientName;
+    private String viewerName;
+    private String streamerName;
     private DataOutputStream dataOut;
-    private int reqestType;
+    private int requestType;
     private ObjectInputStream videoStream;
     private StreamView streamView;
 
-    public ViewStreamRequest(String clientName, String streamName, StreamView view)
+    public ViewStreamRequest(String viewerName, String streamerName, StreamView view)
     {
-        this.clientName = clientName;
-        this.streamName = streamName;
+        this.viewerName = viewerName;
+        this.streamerName = streamerName;
         this.streamView = view;
-        reqestType = 201;
+        requestType = 201;
     }
 
     @Override
@@ -41,26 +43,27 @@ public class ViewStreamRequest extends Request
         {
             try
             {
+                // Connect to server, open communication stream
                 toSendSocket.connect(streamingServer);
-
                 dataOut = new DataOutputStream(toSendSocket.getOutputStream());
 
-                dataOut.writeInt(reqestType);
-                dataOut.writeUTF(clientName);
-                dataOut.writeUTF(streamName);
+                // Send the server your clientType (WATCH), name, and who you want to watch
+                dataOut.writeInt(requestType);
+                dataOut.writeUTF(viewerName);
+                dataOut.writeUTF(streamerName);
                 dataOut.flush();
 
                 videoStream = new ObjectInputStream(toSendSocket.getInputStream());
 
                 while(!Thread.interrupted())
                 {
-
+                    // Read segment from stream
                     StreamSegment segment = (StreamSegment) videoStream.readObject();
-                    System.out.println("Got a segement!");
-
                     Platform.runLater(() ->
                     {
-                        streamView.queueMediaPlayer(segment.getSegment());
+                        // Write new segment file
+                        MediaPlayer player = segment.getSegment();
+                        streamView.queueMediaPlayer(player);
                     });
                 }
             }
