@@ -17,6 +17,7 @@ public class LoginDisplay
 {
     private Stage stage;
     private CurrentStreamsRequest curStreamReq;
+    private CheckStreamNamesRequest checkStreamNamesRequest;
     private StartStreamRequest startStreamReq;
 
     public LoginDisplay(Stage stage)
@@ -39,21 +40,22 @@ public class LoginDisplay
 //        HBox hBox2 = new HBox(10, label1, textField1);
 //        hBox2.setAlignment(Pos.CENTER);
 
-        Button b_view = new Button("Launch");
-        HBox hBox3 = new HBox(20, b_view);
+        Button b_view = new Button("Watch");
+        Button b_stream = new Button("Stream");
+        HBox hBox3 = new HBox(20, b_view, b_stream);
         hBox3.setAlignment(Pos.CENTER);
 
         VBox vBox = new VBox(20, hBox1, hBox3);
         vBox.setAlignment(Pos.CENTER);
 
-        addListeners(b_view, textField);
+        addListeners(b_view, b_stream, textField);
 
         Scene scene = new Scene(vBox, 375, 200);
         stage.setScene(scene);
         stage.show();
     }
 
-    private void addListeners(Button b_view, TextField t_name)
+    private void addListeners(Button b_view, Button b_stream, TextField t_name)
     {
         b_view.setOnAction(event ->
         {
@@ -70,7 +72,7 @@ public class LoginDisplay
             Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
             alert2.setTitle("Non-Unique Name");
             alert2.setHeaderText(null);
-            alert2.setContentText("The username you provided is already being used " +
+            alert2.setContentText("The username you provided is already taken " +
                     "by a current user. Please try a different name.");
 
             // Make sure a name was entered.
@@ -121,6 +123,54 @@ public class LoginDisplay
             {
                 // They need to provide a name to continue
                 alert1.showAndWait();
+            }
+        });
+
+        b_stream.setOnAction(event ->
+        {
+            // Get username from textfield
+            String username = t_name.getText();
+
+            // Configure alert if name was not entered
+            Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+            alert1.setTitle("Input Validation");
+            alert1.setHeaderText(null);
+            alert1.setContentText("Username is required to continue.");
+
+            // Configure alert if name is not unique
+            Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
+            alert2.setTitle("Non-Unique Name");
+            alert2.setHeaderText(null);
+            alert2.setContentText("The username you provided is already taken " +
+                    "by a current user. Please try a different name.");
+
+            // Make sure name was entered
+            if(!username.isEmpty())
+            {
+                // Call request to get active streams
+                Socket socket = new Socket();
+                checkStreamNamesRequest= new CheckStreamNamesRequest(username);
+                checkStreamNamesRequest.buildRequest(socket);
+                checkStreamNamesRequest.sendRequest();
+                String ans = checkStreamNamesRequest.getResponse();
+
+                // Response will be unique or not
+                if(!ans.isEmpty())
+                {
+                    if(ans.equals("non-unique name"))
+                    {
+                        // Name already streaming, try again
+                        alert2.showAndWait();
+                    } else if(ans.equals("valid-name"))
+                    {
+                        StreamClientDisplay display = new StreamClientDisplay(stage, username);
+                        display.show();
+                    }
+                }
+            }
+            else
+            {
+                System.out.println("Return String is empty... no active streamers.");
             }
         });
 

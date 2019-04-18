@@ -48,8 +48,11 @@ public class ViewStreamRequest extends Request
                 dataOut = new DataOutputStream(toSendSocket.getOutputStream());
 
                 // Send the server your clientType (WATCH), name, and who you want to watch
+                System.out.println("View Request - requestType: " + requestType);
                 dataOut.writeInt(requestType);
+                System.out.println("View Request - viewerName: " + viewerName);
                 dataOut.writeUTF(viewerName);
+                System.out.println("View Request - streamerName: " + streamerName);
                 dataOut.writeUTF(streamerName);
                 dataOut.flush();
 
