@@ -5,7 +5,7 @@
 Github: Dixonnn/Chris Dixon
 * For some reason, when pushing code through the IntelliJ IDE, it registered my contributor name as 'Chris Dixon', but when editing the repo directly or merging pull requests it lists me as 'Dixonnn', my account name.
 
-### Ian Thomas | ********
+### Ian Thomas | 95390625
 Github: JuneToJuly
 
 ## Member Contributions
@@ -18,7 +18,13 @@ Github: JuneToJuly
 * Poster 
 
 ### Ian
-
+* Splitting Files
+* Sending Segments to Server
+* Passing Segments to Watchers
+* Buffered Display
+* Making Requests
+* Dealing with concurrency Problems
+* Poster
 
 
 ## Project Description (3-4 Sentences)
