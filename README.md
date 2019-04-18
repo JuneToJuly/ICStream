@@ -9,6 +9,16 @@ Github: Dixonnn/Chris Dixon
 Github: JuneToJuly
 
 ## Member Contributions
+### Chris
+* Initial UDP server base case
+* ThreadPool implementation
+* UI Handlers
+* Request differentiation
+* Request handler separation on server
+* Poster 
+
+### Ian
+
 
 
 ## Project Description (3-4 Sentences)
