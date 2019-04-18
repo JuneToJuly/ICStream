@@ -51,9 +51,8 @@ public class WatchClientDisplay
         HBox hBox1 = new HBox(sideBarLabel);
         VBox vBox2 = new VBox(10, radioArray);
         Button viewButton = new Button("View");
-        Button streamButton = new Button("Stream");
 
-        VBox sideBar = new VBox(20, hBox1, vBox2, viewButton, streamButton);
+        VBox sideBar = new VBox(20, hBox1, vBox2, viewButton);
         sideBar.setAlignment(Pos.TOP_LEFT);
 
         StreamView streamView = new StreamView();
@@ -64,8 +63,8 @@ public class WatchClientDisplay
 
         HBox hBox = new HBox(ws1, sideBar, ws2, viewArea);
 
-        addListeners(viewButton, streamButton, radioGroup, streamView);
-        scene = new Scene(hBox, 850, 400);
+        addListeners(viewButton, radioGroup, streamView);
+        scene = new Scene(hBox, 1200, 600);
         stage.setScene(scene);
         stage.show();
 //        FlowPane pane = new FlowPane();
@@ -84,7 +83,7 @@ public class WatchClientDisplay
 
     }
 
-    private void addListeners(Button viewButton, Button streamButton, ToggleGroup radioGroup, StreamView streamView)
+    private void addListeners(Button viewButton, ToggleGroup radioGroup, StreamView streamView)
     {
         viewButton.setOnAction(e ->
         {
@@ -97,11 +96,6 @@ public class WatchClientDisplay
             System.out.println("Sending view request to server.");
             viewStreamReq.sendRequest();
         });
-
-//        streamButton.setOnAction(e ->
-//        {
-//            viewStreamReq.stopRequest();
-//        });
     }
     public void show()
     {

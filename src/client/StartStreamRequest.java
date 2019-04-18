@@ -33,7 +33,7 @@ public class StartStreamRequest extends Request
         this.clientName = clientName;
         this.streamTitle = streamTitle;
         this.streamFile = streamFile;
-        this.requestType = 100;
+        this.requestType = 101;
     }
 
     @Override
@@ -98,24 +98,24 @@ public class StartStreamRequest extends Request
                     {
                         break;
                     }
-                    else // Name not unique, need another name
-                    {
-                        String name = "";
-                        ArrayBlockingQueue<String> nameQ = new ArrayBlockingQueue<String>(1);
-                        Platform.runLater(() ->
-                        {
-                            try { nameQ.put(new TextInputDialog("Enter New Name").showAndWait().get()); }
-                            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-                        });
-
-                        // Blocks
-                        try { nameQ.take(); }
-                        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-
-                        dataOut.writeInt(requestType);
-                        dataOut.writeUTF(name);
-                        dataOut.flush();
-                    }
+//                    else // Name not unique, need another name
+//                    {
+//                        String name = "";
+//                        ArrayBlockingQueue<String> nameQ = new ArrayBlockingQueue<String>(1);
+//                        Platform.runLater(() ->
+//                        {
+//                            try { nameQ.put(new TextInputDialog("Enter New Name").showAndWait().get()); }
+//                            catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+//                        });
+//
+//                        // Blocks
+//                        try { nameQ.take(); }
+//                        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+//
+//                        dataOut.writeInt(requestType);
+//                        dataOut.writeUTF(name);
+//                        dataOut.flush();
+//                    }
                 }
             }
             catch (IOException e) { e.printStackTrace(); }
@@ -126,7 +126,6 @@ public class StartStreamRequest extends Request
                 splitFile = splitFileTask.get(); // Get our split file from earlier future
             }
             catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
-
 
             String prefix = splitFile.getSplitPrefix();
             for (int i = 0; i < splitFile.getSplitCount(); i++)

@@ -8,7 +8,7 @@ public class StreamClientLauncher extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        StreamClientDisplay display = new StreamClientDisplay(primaryStage);
+        StreamClientDisplay display = new StreamClientDisplay(primaryStage, "name");
         display.show();
     }
 

@@ -66,23 +66,43 @@ public class InitialConnectionHandler implements Runnable
                 dataOut = new DataOutputStream(returnSocket.getOutputStream());
                 switch(clientType)
                 {
-                    // Client would like to start Streaming
+                    // Client needs to know who's streaming before they can begin
                     case 100:
                         streamerName = clientName;
-                        System.out.println("Handling streamStart()");
-                        if(!streamingClients.containsKey(streamerName))
+                        System.out.println("Checking if streamer name already exists.");
+                        System.out.println("Name: " + streamerName);
+
+                        if(streamingClients.containsKey(streamerName))
                         {
-                            // Add client name and ID to Server streamingMap
-                            streamingClients.put(streamerName, Thread.currentThread().getId());
-                            System.out.println("Calling startStream()");
-                            startStream(streamerName);
+                            System.out.println(streamerName + " already viewing.");
+                            dataOut.writeUTF("non-unique name");
                         }
                         else
                         {
-                            // Client name already exists
-                            dataOut.writeUTF("Streamer with the same name is already active.");
-                            dataOut.flush();
+                            System.out.println(streamerName + " is unique.");
+                            streamingClients.put(streamerName, Thread.currentThread().getId());
+                            dataOut.writeUTF("valid-name");
                         }
+                        dataOut.flush();
+                        break;
+
+                    // Client would like to start Streaming
+                    case 101:
+                        streamerName = clientName;
+                        System.out.println("Calling startStream()");
+                        startStream(streamerName);
+//                        if(!streamingClients.containsKey(streamerName))
+//                        {
+//                            // Add client name and ID to Server streamingMap
+//                            System.out.println("Calling startStream()");
+//                            startStream(streamerName);
+//                        }
+//                        else
+//                        {
+//                            // Client name already exists
+//                            dataOut.writeUTF("Streamer with the same name is already active.");
+//                            dataOut.flush();
+//                        }
                         break;
 
                     // Client would like to know who is currently streaming
@@ -206,7 +226,8 @@ public class InitialConnectionHandler implements Runnable
         System.out.println("watchStream() called for thread: " + Thread.currentThread().getId());
         // Get the stream
         LiveStream liveStream = liveStreams.get(streamerName);
-        System.out.println("Setting up stream: " + streamerName);
+        System.out.println("Setting up stream: " + viewerName + " watching " + streamerName);
+        System.out.println("CurrentWatchingStream: " + currentWatchingStream.toString());
         liveStream.startViewing(viewerName, streamerName, currentWatchingStream);
 
         ObjectOutputStream videoStream = null;
